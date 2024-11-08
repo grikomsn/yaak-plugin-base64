@@ -1,0 +1,60 @@
+name: Autobuild
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Perform a dry run (no actual publish)"
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  autobuild:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: "package.json"
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          cache: "pnpm"
+          node-version-file: ".nvmrc"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      # - name: Check for lint errors
+      #   run: pnpm check
+      - name: Build package
+        run: pnpm build
+      - name: Set outputs
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - name: Update version
+        run: npm version "0.0.0-alpha-${{ steps.vars.outputs.sha_short }}" --no-git-tag-version
+      - name: Publish package
+        run: pnpm publish --no-git-checks --tag alpha ${{ inputs.dry_run && '--dry-run' || '' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pack package (dry run)
+        if: ${{ inputs.dry_run }}
+        run: |
+          pnpm pack
+          mkdir -p artifacts
+          mv *.tgz artifacts/
+      - name: Upload artifact (dry run)
+        if: ${{ inputs.dry_run }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-artifact
+          path: artifacts/*.tgz
+          retention-days: 5

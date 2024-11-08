@@ -1,0 +1,26 @@
+{
+  "name": "yaak-plugin-base64",
+  "description": "Plugin for encode/decode base64 values",
+  "version": "0.0.0-experimental",
+  "repository": "https://github.com/grikomsn/yaak-plugin-base64",
+  "author": "Griko Nibras <griko@nibras.co>",
+  "main": "build/index.js",
+  "files": [
+    "build/"
+  ],
+  "scripts": {
+    "build": "yaakcli build ./src/index.ts",
+    "dev": "yaakcli dev"
+  },
+  "dependencies": {
+    "@yaakapp/api": "^0.2.16"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "@yaakapp/cli": "^0.1.2",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  },
+  "license": "MIT",
+  "packageManager": "pnpm@9.12.3+sha512.cce0f9de9c5a7c95bef944169cc5dfe8741abfb145078c0d508b868056848a87c81e626246cb60967cbd7fd29a6c062ef73ff840d96b3c86c40ac92cf4a813ee"
+}
