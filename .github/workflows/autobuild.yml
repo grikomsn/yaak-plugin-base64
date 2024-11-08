@@ -30,10 +30,9 @@ jobs:
         with:
           cache: "pnpm"
           node-version-file: ".nvmrc"
+          registry-url: "https://registry.npmjs.org"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      # - name: Check for lint errors
-      #   run: pnpm check
       - name: Build package
         run: pnpm build
       - name: Set outputs
@@ -45,6 +44,19 @@ jobs:
         run: pnpm publish --no-git-checks --tag alpha ${{ inputs.dry_run && '--dry-run' || '' }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Setup Node with GPR
+        uses: actions/setup-node@v4
+        with:
+          cache: "pnpm"
+          node-version-file: ".nvmrc"
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@grikomsn"
+      - name: Rename package for GPR
+        run: node scripts/rename-gpr-package.js
+      - name: Publish package on GPR
+        run: pnpm publish --no-git-checks --tag alpha ${{ inputs.dry_run && '--dry-run' || '' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Pack package (dry run)
         if: ${{ inputs.dry_run }}
         run: |
